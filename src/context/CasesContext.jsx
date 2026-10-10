@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { getCases, POLL_MS } from '../services/api';
 import { useAuth } from './AuthContext';
+import { useReportTracker } from './ReportTrackerContext';
 
 const CasesContext = createContext(null);
 export const useCases = () => useContext(CasesContext);
@@ -9,6 +10,9 @@ const ALERT_THRESHOLD = 85; // 'Critical' band
 
 export function CasesProvider({ children }) {
   const { user } = useAuth();
+  const tracker = useReportTracker();
+  const trackerRef = useRef(tracker);
+  trackerRef.current = tracker;
   const enabled = !!user && user.role !== 'reporter'; // reporters only submit emails; they don't read the case list
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +33,7 @@ export function CasesProvider({ children }) {
       } else {
         const fresh = data.filter((c) => !seen.current.has(c.case_id));
         fresh.forEach((c) => seen.current.add(c.case_id));
-        const hot = fresh.filter((c) => c.overall_risk_score >= ALERT_THRESHOLD);
+        const hot = fresh.filter((c) => c.overall_risk_score >= ALERT_THRESHOLD && !trackerRef.current?.isOwnUpload(c)); // the person's own upload already has its report card
         if (hot.length) setAlerts((a) => [...hot, ...a].slice(0, 5));
       }
     } catch (e) {

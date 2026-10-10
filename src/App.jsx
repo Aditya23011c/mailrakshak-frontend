@@ -3,6 +3,8 @@ import Layout from './components/Layout';
 import RequireAuth from './components/RequireAuth';
 import { AuthProvider } from './context/AuthContext';
 import { CasesProvider } from './context/CasesContext';
+import { TrackerProvider } from './context/ReportTrackerContext';
+import FloatingReport from './components/FloatingReport';
 import Dashboard from './pages/Dashboard';
 import CaseDetail from './pages/CaseDetail';
 import Campaigns from './pages/Campaigns';
@@ -29,6 +31,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <TrackerProvider>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
@@ -42,6 +45,8 @@ export default function App() {
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <FloatingReport />
+        </TrackerProvider>
       </AuthProvider>
     </BrowserRouter>
   );

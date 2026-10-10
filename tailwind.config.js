@@ -4,12 +4,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: { 950: '#050912', 900: '#0a1120', 800: '#0f1a2e', 700: '#16233d', 600: '#1f3052' },
-        accent: { DEFAULT: '#38bdf8', soft: '#7dd3fc', deep: '#0ea5e9' },
-        risk: { critical: '#ff3b5c', high: '#ff8a1f', medium: '#f5c518', low: '#22d3a0' },
+        ink: { 950: '#02060b', 900: '#050d14', 800: '#08141d', 700: '#0d1f2b', 600: '#12303a' },
+        neon: { green: '#22ff9c', cyan: '#2de2ff', purple: '#b26bff', magenta: '#ff4fd8' },
+        accent: { DEFAULT: '#22ff9c', soft: '#8dffc9', deep: '#00d97e' },
+        risk: { critical: '#ff2e63', high: '#ff9f1c', medium: '#ffd23f', low: '#22ff9c' },
       },
       fontFamily: {
-        sans: ['"Schibsted Grotesk"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['"Chakra Petch"', '"Schibsted Grotesk"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       keyframes: {

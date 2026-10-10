@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Eye, EyeOff, Loader2, Lock, Mail, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react';
 import LiveBackground from '../components/LiveBackground';
+import Logo from '../components/Logo';
 import { useAuth } from '../context/AuthContext';
 import { forgotPassword } from '../services/api';
 
@@ -111,12 +112,8 @@ export default function Login() {
       <LiveBackground />
       <div className="panel w-full max-w-md animate-slideDown p-7">
         <Link to="/" className="mb-4 inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-100"><ArrowLeft className="h-3.5 w-3.5" /> Back to home</Link>
-        <div className="mb-5 flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-accent"><ShieldCheck className="h-6 w-6" /></span>
-          <div className="leading-tight">
-            <p className="text-lg font-bold text-slate-50">MailRakshak</p>
-            <p className="text-xs text-slate-500">Email threat console</p>
-          </div>
+        <div className="mb-3 flex justify-center">
+          <Logo size="h-20" stacked />
         </div>
 
         <h1 className="text-xl font-bold tracking-tight text-slate-50">Sign in to continue</h1>
@@ -129,7 +126,7 @@ export default function Login() {
               role="tab"
               aria-selected={role === p.key}
               onClick={() => pickRole(p.key)}
-              className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${role === p.key ? 'bg-accent/20 text-accent-soft shadow-[0_0_0_1px_rgba(56,189,248,.4)]' : 'text-slate-400 hover:text-slate-100'}`}
+              className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${role === p.key ? 'bg-accent/20 text-accent-soft shadow-[0_0_0_1px_rgba(34,255,156,.45)]' : 'text-slate-400 hover:text-slate-100'}`}
             >
               {p.label}
             </button>

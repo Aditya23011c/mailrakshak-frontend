@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Layers, ShieldCheck, RefreshCw, UploadCloud, LogOut } from 'lucide-react';
+import { LayoutDashboard, Layers, RefreshCw, UploadCloud, LogOut, Users } from 'lucide-react';
 import LiveBackground from './LiveBackground';
+import Logo from './Logo';
 import AlertBanner from './AlertBanner';
 import { useCases } from '../context/CasesContext';
 import { useAuth } from '../context/AuthContext';
 
 const NAV = [
-  { to: '/dashboard', label: 'Dashboard', Icon: LayoutDashboard, end: true, roles: ['analyst', 'admin'] },
-  { to: '/upload', label: 'Analyze email', Icon: UploadCloud, roles: ['reporter', 'analyst', 'admin'] },
-  { to: '/campaigns', label: 'Campaigns', Icon: Layers, roles: ['analyst', 'admin'] },
+  { to: '/dashboard', label: 'Dashboard', Icon: LayoutDashboard, end: true, roles: ['analyst', 'admin', 'superadmin'] },
+  { to: '/upload', label: 'Analyze email', Icon: UploadCloud, roles: ['reporter', 'analyst', 'admin', 'superadmin'] },
+  { to: '/campaigns', label: 'Campaigns', Icon: Layers, roles: ['analyst', 'admin', 'superadmin'] },
+  { to: '/team', label: 'Team', Icon: Users, roles: ['admin', 'superadmin'] },
 ];
 
 function Clock() {
@@ -32,15 +34,9 @@ export default function Layout() {
       <LiveBackground />
       <AlertBanner />
       <header className="sticky top-0 z-30 border-b border-white/10 bg-ink-950/70 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
-          <Link to="/" className="flex items-center gap-2" title="Home">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/15 text-accent">
-              <ShieldCheck className="h-5 w-5" />
-            </span>
-            <div className="leading-tight">
-              <p className="text-sm font-bold text-slate-50">MailRakshak</p>
-              <p className="text-[11px] text-slate-500">Email threat console</p>
-            </div>
+        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-2">
+          <Link to="/" className="flex shrink-0 items-center" title="MailRakshak home" aria-label="MailRakshak home">
+            <Logo size="h-11" />
           </Link>
           <nav className="ml-4 flex gap-1">
             {NAV.filter((n) => n.roles.includes(user?.role)).map(({ to, label, Icon, end }) => (

@@ -149,6 +149,9 @@ export const generateReport = async (id, format) => unwrap(await request(`/cases
 export const verifyCaseAnchor = async (id) => unwrap(await request(`/cases/${id}/verify`, { method: 'POST' }));                                           // analyst + admin
 export const assignAnalyst = async (id, analystId) => normalizeCase(unwrap(await request(`/cases/${id}/assign`, { method: 'POST', body: { analystId } }))); // admin
 export const fetchAnalysts = async () => unwrap(await request('/auth/analysts')) ?? [];                                                                     // admin
+// Team management (see backend-team-management.md): list staff, change a role.
+export const fetchUsers = async () => unwrap(await request('/auth/users')) ?? [];                                                                             // admin + superadmin
+export const changeUserRole = async (id, role) => unwrap(await request(`/auth/users/${id}/role`, { method: 'PATCH', body: { role } }));                         // superadmin
 export const registerStaffAccount = ({ email, password, role, name }) => request('/auth/register', { method: 'POST', body: { email, password, role, name } }); // admin
 export const fetchMyReports = (filters) => request('/reporters/me/cases', { params: filters });                                                            // reporter
 export const fetchReporterRateLimit = () => request('/reporters/me/rate-limit');                                                                            // reporter
@@ -176,7 +179,9 @@ const readPending = (k) => { try { return JSON.parse(sessionStorage.getItem(k));
 
 function finishStaff(data, role, email) {
   const user = data.user ?? { email, role: data.role ?? role };
-  if (role && user.role !== role) throw new Error(`This account is not ${role === 'admin' ? 'an admin' : 'an analyst'} account. Try the other portal.`);
+  // A super admin signs in through the Admin portal.
+  const ok = user.role === role || (role === 'admin' && user.role === 'superadmin');
+  if (role && !ok) throw new Error(`This account is not ${role === 'admin' ? 'an admin' : 'an analyst'} account. Try the other portal.`);
   return { token: data.token, user };
 }
 

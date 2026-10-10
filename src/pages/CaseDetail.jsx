@@ -80,7 +80,7 @@ export default function CaseDetail() {
           )}
           <span className="chip border-white/10 text-slate-300"><Server className="h-3 w-3" /> {titleCase(c.enrichment?.infrastructure_type)} infrastructure</span>
         </div>
-        {user?.role === 'admin' && <AssignAnalyst caseData={c} onChange={setC} />}
+        {(user?.role === 'admin' || user?.role === 'superadmin') && <AssignAnalyst caseData={c} onChange={setC} />}
       </header>
 
       <div className="grid gap-5 lg:grid-cols-5">

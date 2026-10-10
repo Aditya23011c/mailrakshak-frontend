@@ -83,7 +83,7 @@ export default function TraceMap({ forensics, enrichment }) {
                 {geo.isp}
               </Popup>
             </Marker>
-            <CircleMarker center={dest} radius={7} pathOptions={{ color: '#38bdf8', fillColor: '#38bdf8', fillOpacity: 0.9 }}>
+            <CircleMarker center={dest} radius={7} pathOptions={{ color: '#22ff9c', fillColor: '#22ff9c', fillOpacity: 0.9 }}>
               <Popup>{RECIPIENT.name}</Popup>
             </CircleMarker>
           </MapContainer>
@@ -114,7 +114,7 @@ export default function TraceMap({ forensics, enrichment }) {
               <Tooltip content={<Tip />} cursor={{ fill: 'rgba(255,255,255,.04)' }} />
               <Bar dataKey="delaySec" radius={[4, 4, 0, 0]} isAnimationActive animationDuration={900}>
                 {hopData.map((d) => (
-                  <Cell key={d.hop} fill={d.odd ? '#ff3b5c' : '#38bdf8'} />
+                  <Cell key={d.hop} fill={d.odd ? '#ff3b5c' : '#22ff9c'} />
                 ))}
               </Bar>
             </BarChart>

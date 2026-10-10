@@ -31,7 +31,7 @@ export default function Timeline({ caseData }) {
                 <div className="absolute right-1/2 top-4 hidden h-0.5 w-full bg-white/10 md:block">
                   <div
                     className="h-full origin-left animate-grow bg-gradient-to-r from-accent/80 to-accent"
-                    style={{ animationDelay: `${i * 260}ms`, boxShadow: '0 0 8px rgba(56,189,248,.7)' }}
+                    style={{ animationDelay: `${i * 260}ms`, boxShadow: '0 0 8px rgba(34,255,156,.7)' }}
                   />
                 </div>
               )}

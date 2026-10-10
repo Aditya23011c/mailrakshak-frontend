@@ -122,13 +122,13 @@ export default function Dashboard() {
               <AreaChart data={volume} margin={{ top: 6, right: 8, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="gHigh" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ff3b5c" stopOpacity={0.5} /><stop offset="100%" stopColor="#ff3b5c" stopOpacity={0} /></linearGradient>
-                  <linearGradient id="gLow" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#38bdf8" stopOpacity={0.4} /><stop offset="100%" stopColor="#38bdf8" stopOpacity={0} /></linearGradient>
+                  <linearGradient id="gLow" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#22ff9c" stopOpacity={0.4} /><stop offset="100%" stopColor="#22ff9c" stopOpacity={0} /></linearGradient>
                 </defs>
                 <CartesianGrid stroke="rgba(255,255,255,.06)" vertical={false} />
                 <XAxis dataKey="label" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <YAxis allowDecimals={false} tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <Tooltip content={<ChartTip />} />
-                <Area type="monotone" dataKey="Lower risk" stroke="#38bdf8" strokeWidth={2} fill="url(#gLow)" />
+                <Area type="monotone" dataKey="Lower risk" stroke="#22ff9c" strokeWidth={2} fill="url(#gLow)" />
                 <Area type="monotone" dataKey="High risk" stroke="#ff3b5c" strokeWidth={2} fill="url(#gHigh)" />
               </AreaChart>
             </ResponsiveContainer>

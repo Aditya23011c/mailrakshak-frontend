@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Loader2, Lock, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Loader2, Lock } from 'lucide-react';
 import LiveBackground from '../components/LiveBackground';
+import Logo from '../components/Logo';
 import { resetPassword } from '../services/api';
 
 export default function ResetPassword() {
@@ -37,10 +38,10 @@ export default function ResetPassword() {
       <LiveBackground />
       <div className="panel w-full max-w-md animate-slideDown p-7">
         <Link to="/login" className="mb-4 inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-100"><ArrowLeft className="h-3.5 w-3.5" /> Back to sign in</Link>
-        <div className="mb-5 flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-accent"><ShieldCheck className="h-6 w-6" /></span>
-          <p className="text-lg font-bold text-slate-50">Reset your password</p>
+        <div className="mb-3 flex justify-center">
+          <Logo size="h-16" stacked />
         </div>
+        <h1 className="mb-5 text-lg font-bold text-slate-50">Reset your password</h1>
 
         {done ? (
           <div className="space-y-4 text-center">

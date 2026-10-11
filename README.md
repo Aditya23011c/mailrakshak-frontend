@@ -85,3 +85,16 @@ PASSWORD_RESET_URL to `<ngrok URL>/reset-password`.
 
 ## Team management
 Super admin: can add admins and analysts and change roles. Admin: can add analysts only. Backend rules: see `backend-team-management.md`.
+
+## Guidance and explanations (UX)
+
+Plain-language help is built in at every level and comes from one file, `src/content/knowledge.js`
+(glossary, FAQ, pipeline stages, role descriptions, .eml how-to, per-page guides). Edit the wording there.
+
+- **Landing page**: the 3D journey now shows what each stage gives you and where to find it in the app.
+  Below it: Start here (3 steps and how to save a .eml), Live demo (3 sample emails, reporter vs analyst view),
+  Roles, Glossary and FAQ. The classic (non-3D) page carries the same content.
+- **Inside the app**: `(i)` tips next to technical terms (`components/InfoTip.jsx`), a "how this page works"
+  note on each page (`components/PageIntro.jsx`, closes for good once dismissed), a Help panel with page guide,
+  glossary and FAQ (`components/HelpDrawer.jsx`, press `?` anywhere) and an "In plain words" summary on every
+  case (`lib/explain.js`).

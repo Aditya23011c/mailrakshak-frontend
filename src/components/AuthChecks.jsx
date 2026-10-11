@@ -1,4 +1,6 @@
 import { CheckCircle2, XCircle, MinusCircle, AlertCircle } from 'lucide-react';
+import InfoTip from './InfoTip';
+import { GLOSSARY } from '../content/knowledge';
 
 const STATE = {
   pass: { Icon: CheckCircle2, text: 'text-risk-low', bg: 'bg-risk-low/10', border: 'border-risk-low/30', label: 'Pass' },
@@ -8,12 +10,6 @@ const STATE = {
   none: { Icon: MinusCircle, text: 'text-slate-400', bg: 'bg-white/5', border: 'border-white/10', label: 'Not present' },
 };
 const stateFor = (v) => STATE[String(v || 'none').toLowerCase()] ?? STATE.none;
-
-const HELP = {
-  SPF: 'Is the sending server allowed by the domain?',
-  DKIM: 'Is the message signature valid?',
-  DMARC: 'Does the domain policy align with SPF/DKIM?',
-};
 
 export default function AuthChecks({ forensics }) {
   const items = [
@@ -32,11 +28,11 @@ export default function AuthChecks({ forensics }) {
             style={{ animationDelay: `${i * 90}ms` }}
           >
             <div className="flex items-center justify-between">
-              <span className="font-semibold text-slate-100">{name}</span>
+              <span className="inline-flex items-center gap-1.5 font-semibold text-slate-100">{name} <InfoTip term={name.toLowerCase()} /></span>
               <s.Icon className={`h-5 w-5 ${s.text}`} />
             </div>
             <p className={`mt-1 text-sm font-medium ${s.text}`}>{s.label}</p>
-            <p className="mt-1 text-xs text-slate-400">{HELP[name]}</p>
+            <p className="mt-1 text-xs text-slate-400">{GLOSSARY[name.toLowerCase()].short}</p>
           </div>
         );
       })}

@@ -28,5 +28,11 @@ export function riskLevel(score = 0) {
   return RISK.low;
 }
 
-// Detection confidence_score is read as "probability the email is malicious" (0-1).
-export const fraudScore = (c) => Math.round((c?.detection?.confidence_score ?? 0) * 100);
+// confidence_score (0-1) is how sure the model is of the label it chose, not how risky the email is.
+// For "legitimate" the two point opposite ways (93% sure it is safe = 7 fraud score), so invert it there.
+export const fraudScore = (c) => {
+  const conf = c?.detection?.confidence_score;
+  if (typeof conf !== 'number') return 0;
+  const pct = Math.round((conf > 1 ? conf / 100 : conf) * 100);
+  return String(c?.detection?.classification).toLowerCase() === 'legitimate' ? 100 - pct : pct;
+};

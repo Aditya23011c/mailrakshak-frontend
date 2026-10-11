@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Layers, RefreshCw, UploadCloud, LogOut, Users } from 'lucide-react';
+import { HelpCircle, LayoutDashboard, Layers, RefreshCw, UploadCloud, LogOut, Users } from 'lucide-react';
 import LiveBackground from './LiveBackground';
 import Logo from './Logo';
 import AlertBanner from './AlertBanner';
+import HelpDrawer from './HelpDrawer';
 import { useCases } from '../context/CasesContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -26,6 +27,16 @@ function Clock() {
 export default function Layout() {
   const { error, refresh, lastSync } = useCases();
   const { user, logout } = useAuth();
+  const [help, setHelp] = useState(false);
+  useEffect(() => {
+    const onKey = (e) => {
+      const t = e.target;
+      if (e.key !== '?' || e.ctrlKey || e.metaKey || /input|textarea|select/i.test(t?.tagName) || t?.isContentEditable) return;
+      setHelp(true);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
   const link = ({ isActive }) =>
     `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${isActive ? 'bg-accent/15 text-accent-soft' : 'text-slate-400 hover:bg-white/5 hover:text-slate-100'}`;
 
@@ -57,6 +68,9 @@ export default function Layout() {
                 <p className="text-[11px] capitalize text-accent-soft">{user.role}</p>
               </div>
             )}
+            <button onClick={() => setHelp(true)} className="btn border-accent/30 px-2.5 text-accent-soft" aria-label="Open help" title="Help and glossary (press ?)">
+              <HelpCircle className="h-4 w-4" /> <span className="hidden md:inline">Help</span>
+            </button>
             <button onClick={refresh} className="btn px-2" aria-label="Refresh cases" title={lastSync ? `Last sync ${new Date(lastSync).toLocaleTimeString()}` : 'Refresh'}>
               <RefreshCw className="h-4 w-4" />
             </button>
@@ -74,6 +88,7 @@ export default function Layout() {
         )}
         <Outlet />
       </main>
+      <HelpDrawer open={help} onClose={() => setHelp(false)} />
     </div>
   );
 }

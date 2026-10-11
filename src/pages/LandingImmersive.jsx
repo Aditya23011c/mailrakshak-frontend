@@ -1,22 +1,27 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Logo from '../components/Logo';
+import LandingSections from '../components/landing/LandingSections';
+import { PIPELINE } from '../content/knowledge';
 import { useAuth } from '../context/AuthContext';
 import { N, createWalkthrough } from '../three/walkthrough';
 
-// Eight chapters: a hero, six pipeline stages and a closing call to action.
-// The text lives in the page (readable, selectable, accessible); the 3D scene is the backdrop.
+// Eight chapters: a hero, six pipeline stages and a closing call to action. The 3D scene is the backdrop;
+// the text lives in the page (readable, selectable, accessible). Below the journey, normal sections
+// (start guide, live demo, roles, glossary, FAQ) carry the detail.
 const CHAPTERS = [
   { tag: 'MailRakshak', nav: null },
-  { tag: 'Chapter 01 · Report', nav: 'Report', title: 'Every investigation starts with one email', body: 'Upload a suspicious .eml and MailRakshak takes it from there. No setup and no copying headers by hand. Each report becomes its own case.' },
-  { tag: 'Chapter 02 · Detect', nav: 'Detect', title: 'AI reads the message', body: 'Subject and body are classified as legitimate, suspicious, phishing or business email compromise (BEC), with a confidence score and the exact phrases that raised the flag.' },
-  { tag: 'Chapter 03 · Verify', nav: 'Verify', title: 'Is the sender who they claim to be?', body: 'SPF, DKIM and DMARC are checked, then the relay path is rebuilt hop by hop to expose spoofed senders, forged return paths and out-of-order timestamps.' },
-  { tag: 'Chapter 04 · Trace', nav: 'Trace', title: 'Where did it really come from?', body: 'The sending IP is located on a map and checked for VPN, Tor and hosting networks. Domain age and DNS records show whether the infrastructure adds up.' },
-  { tag: 'Chapter 05 · Connect', nav: 'Connect', title: 'One attacker, one campaign', body: 'Emails that share infrastructure are grouped, so related attacks surface together instead of as a pile of unrelated alerts.' },
-  { tag: 'Chapter 06 · Prove', nav: 'Prove', title: 'Evidence that cannot be quietly changed', body: 'When an admin confirms a threat, a fingerprint of the case is anchored on a public blockchain test network. Only the fingerprint is stored, never the email itself.' },
-  { tag: 'Chapter 07 · Begin', nav: null, title: 'Got an email you do not trust?', body: 'Reporters, analysts and admins each get their own portal.' },
+  ...PIPELINE,
+  { tag: 'Chapter 07 · Begin', nav: null, title: 'Got an email you do not trust?', body: 'Reporters, analysts and admins each get their own portal. Scroll on for a three-step guide and a live demo.' },
 ];
-const NAV = CHAPTERS.map((c, i) => ({ ...c, i })).filter((c) => c.nav);
+const NAV_LINKS = [
+  { label: 'How it works', chapter: 1 },
+  { label: 'Start here', id: 'start' },
+  { label: 'Live demo', id: 'demo' },
+  { label: 'Roles', id: 'roles' },
+  { label: 'Learn', id: 'learn' },
+  { label: 'FAQ', id: 'faq' },
+];
 
 const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 
@@ -30,10 +35,11 @@ export default function LandingImmersive({ onFail }) {
   const cueEl = useRef(null);
   const lastIdx = useRef(-1);
 
-  const goTo = (i) => {
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    window.scrollTo({ top: (i / (N - 1)) * max, behavior: 'smooth' });
-  };
+  const spacer = useRef(null);
+  // The camera only travels while the journey section scrolls past; the info sections below it scroll normally.
+  const tunnelMax = () => Math.max(1, (spacer.current?.offsetHeight ?? 0) - window.innerHeight);
+  const goTo = (i) => window.scrollTo({ top: (i / (N - 1)) * tunnelMax(), behavior: 'smooth' });
+  const toId = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -65,8 +71,8 @@ export default function LandingImmersive({ onFail }) {
       return undefined;
     }
     const onScroll = () => {
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      walk.setProgress(max > 0 ? window.scrollY / max : 0);
+      const max = Math.max(1, (spacer.current?.offsetHeight ?? 0) - window.innerHeight);
+      walk.setProgress(clamp(window.scrollY / max));
     };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -93,10 +99,10 @@ export default function LandingImmersive({ onFail }) {
       <header className="fixed inset-x-0 top-3 z-30 flex justify-center px-3">
         <nav className="flex w-full max-w-5xl items-center justify-between gap-3 rounded-full border border-white/10 bg-black/50 py-1.5 pl-4 pr-1.5 backdrop-blur-md" aria-label="Main">
           <Link to="/" onClick={() => goTo(0)} aria-label="MailRakshak home"><Logo size="h-8" /></Link>
-          <ul className="hidden items-center md:flex">
-            {NAV.map((c) => (
-              <li key={c.nav}>
-                <button onClick={() => goTo(c.i)} className="rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300 transition-colors hover:text-accent">{c.nav}</button>
+          <ul className="hidden items-center lg:flex">
+            {NAV_LINKS.map((c) => (
+              <li key={c.label}>
+                <button onClick={() => (c.id ? toId(c.id) : goTo(c.chapter))} className="rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-300 transition-colors hover:text-accent">{c.label}</button>
               </li>
             ))}
           </ul>
@@ -143,18 +149,34 @@ export default function LandingImmersive({ onFail }) {
                   <>
                     <h1 className="text-[clamp(2.4rem,7.5vw,5.4rem)] font-bold uppercase leading-none tracking-[0.14em] text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.75)]">MailRakshak</h1>
                     <p className="mt-5 max-w-xl text-lg text-slate-100 drop-shadow-[0_1px_10px_rgba(0,0,0,0.8)] md:text-xl">Catch fraudulent email. Trace where it came from. Keep the proof.</p>
+                    <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-300 drop-shadow-[0_1px_8px_rgba(0,0,0,0.8)] md:text-base">MailRakshak checks every suspicious email three ways at once: what it says, whether the sender is genuine, and where it really came from.</p>
+                    <ul className="mt-5 flex flex-wrap gap-2 text-xs text-slate-200">
+                      {['No technical knowledge needed', 'Result in a few seconds', 'Plain-language advice'].map((t) => (
+                        <li key={t} className="rounded-full border border-accent/30 bg-black/40 px-3 py-1 backdrop-blur-sm">{t}</li>
+                      ))}
+                    </ul>
                     <div className="mt-7 flex flex-wrap gap-3">
                       <Link to={home} className="rounded-full bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-ink-950 hover:brightness-110">{user ? 'Open your console' : 'Report an email'}</Link>
                       <button onClick={() => goTo(1)} className="rounded-full border border-white/25 px-6 py-3 text-sm font-semibold uppercase tracking-wider text-slate-100 hover:border-accent hover:text-accent">How it works</button>
+                      <button onClick={() => toId('start')} className="rounded-full border border-white/25 px-6 py-3 text-sm font-semibold uppercase tracking-wider text-slate-100 hover:border-accent hover:text-accent">Start here</button>
                     </div>
                   </>
                 ) : (
                   <>
                     <h2 className="text-2xl font-bold uppercase leading-tight tracking-[0.06em] text-white md:text-4xl">{c.title}</h2>
                     <p className="mt-4 text-base leading-relaxed text-slate-200 md:text-lg">{c.body}</p>
+                    {c.points && (
+                      <ul className="mt-4 space-y-1.5 text-sm text-slate-200 md:text-base">
+                        {c.points.map((pt) => (
+                          <li key={pt} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent shadow-[0_0_6px_#22ff9c]" />{pt}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {c.app && <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-accent/80">In the app · {c.app}</p>}
                     {last && (
                       <div className="mt-6 flex flex-wrap justify-center gap-3">
                         <Link to={home} className="rounded-full bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-ink-950 hover:brightness-110">{user ? 'Open your console' : 'Sign in to report'}</Link>
+                        <button onClick={() => toId('start')} className="rounded-full border border-white/25 px-6 py-3 text-sm font-semibold uppercase tracking-wider text-slate-100 hover:border-accent hover:text-accent">Start here</button>
                       </div>
                     )}
                     {last && <p className="mt-6 text-[11px] uppercase tracking-[0.25em] text-slate-500">Built for Smart India Hackathon 2026 · SIH26106</p>}
@@ -167,7 +189,13 @@ export default function LandingImmersive({ onFail }) {
       </div>
 
       {/* scroll distance that drives the camera */}
-      <div style={{ height: `${CHAPTERS.length * 115}vh` }} />
+      <div ref={spacer} style={{ height: `${CHAPTERS.length * 115}vh` }} />
+
+      {/* information sections: scroll normally over the 3D scene once the journey ends */}
+      <div className="relative z-[25] -mt-px">
+        <div className="pointer-events-none h-40 -translate-y-full bg-gradient-to-b from-transparent to-ink-950" style={{ marginBottom: '-10rem' }} />
+        <LandingSections home={home} user={user} solid />
+      </div>
 
       {/* the same content as plain text for screen readers */}
       <div className="sr-only">

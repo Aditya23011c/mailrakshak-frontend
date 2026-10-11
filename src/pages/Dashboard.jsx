@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import InfoTip from '../components/InfoTip';
+import PageIntro from '../components/PageIntro';
 import { Activity, Layers, ShieldAlert, Timer, Search, X } from 'lucide-react';
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import CaseList from '../components/CaseList';
@@ -23,12 +25,12 @@ function useCountUp(target, ms = 900) {
   return v;
 }
 
-function Stat({ Icon, label, value, display, tone = 'text-accent', hint }) {
+function Stat({ Icon, label, value, display, tone = 'text-accent', hint, tip }) {
   const n = useCountUp(value ?? 0);
   return (
     <div className="panel p-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-400">{label}</p>
+        <p className="flex items-center gap-1.5 text-sm text-slate-400">{label} {tip && <InfoTip term={tip} />}</p>
         <Icon className={`h-4 w-4 ${tone}`} />
       </div>
       <p className={`mt-2 font-mono text-3xl font-semibold ${tone}`}>{display ?? Math.round(n)}</p>
@@ -107,10 +109,14 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-5">
+      <PageIntro id="dashboard" title="Your queue at a glance">
+        <p>Every email that has been analysed appears here, newest first. The cards summarise the queue, the charts show volume and risk, and the table lists each case.</p>
+        <p>Use the risk chips, search, domain and date filters to narrow the list, then click a row to open the full case.</p>
+      </PageIntro>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat Icon={Activity} label="Cases analysed" value={stats.total} hint="All ingestion channels" />
-        <Stat Icon={ShieldAlert} label="High and critical" value={stats.flagged} tone="text-risk-critical" hint="Risk score 60 and above" />
-        <Stat Icon={Layers} label="Active campaigns" value={stats.campaigns} tone="text-risk-high" hint="Cases sharing infrastructure" />
+        <Stat Icon={ShieldAlert} label="High and critical" tip="overall" value={stats.flagged} tone="text-risk-critical" hint="Risk score 60 and above" />
+        <Stat Icon={Layers} label="Active campaigns" tip="campaign" value={stats.campaigns} tone="text-risk-high" hint="Cases sharing infrastructure" />
         <Stat Icon={Timer} label="Average pipeline time" display={fmtElapsed(stats.avg)} value={0} tone="text-risk-low" hint="Receipt to correlated verdict" />
       </div>
 
@@ -135,7 +141,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="panel p-4 lg:col-span-2">
-          <p className="panel-title">Cases by risk level</p>
+          <p className="panel-title flex items-center gap-1.5">Cases by risk level <InfoTip term="overall" /></p>
           <div className="mt-3 flex items-center gap-4">
             <div className="h-44 w-44 shrink-0">
               <ResponsiveContainer width="100%" height="100%">

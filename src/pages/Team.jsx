@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Check, Copy, KeyRound, Loader2, UserPlus, Users } from 'lucide-react';
+import PageIntro from '../components/PageIntro';
 import { useAuth } from '../context/AuthContext';
 import { assignableRoles, creatableRoles, ROLE_LABEL } from '../lib/roles';
 import { changeUserRole, fetchAnalysts, fetchUsers, registerStaffAccount } from '../services/api';
@@ -88,6 +89,11 @@ export default function Team() {
             : 'As an admin you can add analysts to the team.'}
         </p>
       </div>
+
+      <PageIntro id="team" title="Who can do what">
+        <p><b className="text-slate-200">Super admin</b> can add admins and analysts and change anyone's role. <b className="text-slate-200">Admin</b> can add analysts. Analysts cannot manage the team.</p>
+        <p>New people get a temporary password. Share it with them privately; they must choose their own at first sign-in.</p>
+      </PageIntro>
 
       <section className="panel p-5">
         <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-100"><UserPlus className="h-4 w-4 text-accent" /> Add a team member</h2>

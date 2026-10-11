@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown, Fingerprint, Layers } from 'lucide-react';
+import InfoTip from '../components/InfoTip';
+import PageIntro from '../components/PageIntro';
 import RiskBadge from '../components/RiskBadge';
 import { useCases } from '../context/CasesContext';
 import { RISK, riskLevel } from '../lib/risk';
@@ -56,7 +58,7 @@ function CampaignCard({ id, list, index }) {
       {open && (
         <div className="grid gap-5 border-t border-white/10 p-5 pl-6 md:grid-cols-5">
           <div className="md:col-span-2">
-            <p className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-200"><Fingerprint className="h-4 w-4 text-slate-400" /> What these emails share</p>
+            <p className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-200"><Fingerprint className="h-4 w-4 text-slate-400" /> What these emails share <InfoTip term="campaign" /></p>
             {traits.length ? (
               <dl className="space-y-1.5">
                 {traits.map(([k, v]) => (
@@ -103,6 +105,10 @@ export default function Campaigns() {
         <h1 className="text-2xl font-bold tracking-tight text-slate-50">Campaigns</h1>
         <p className="text-sm text-slate-400">Flagged emails grouped by shared sending infrastructure, so one attacker shows up as one item.</p>
       </div>
+      <PageIntro id="campaigns" title="What is a campaign?">
+        <p>When several emails share the same IP range, network, country or domain pattern, they probably come from one attacker. MailRakshak groups them so you see one campaign instead of many separate alerts.</p>
+        <p>Click a campaign to see what its emails share, then open any case inside it.</p>
+      </PageIntro>
       {loading ? (
         <div className="space-y-4">{[0, 1].map((i) => <div key={i} className="panel h-32 animate-pulse" />)}</div>
       ) : groups.length ? (

@@ -83,6 +83,12 @@ export default function LandingImmersive({ onFail }) {
       {/* the 3D scene */}
       <canvas ref={canvasRef} className="fixed inset-0 h-full w-full" aria-hidden="true" />
 
+      {/* soft shade behind the text so it stays readable over the bright scene */}
+      <div
+        className="pointer-events-none fixed inset-0 z-[5]"
+        style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.62), rgba(0,0,0,0.2) 45%, transparent 66%), linear-gradient(0deg, rgba(0,0,0,0.5), transparent 32%)' }}
+      />
+
       {/* floating pill navigation */}
       <header className="fixed inset-x-0 top-3 z-30 flex justify-center px-3">
         <nav className="flex w-full max-w-5xl items-center justify-between gap-3 rounded-full border border-white/10 bg-black/50 py-1.5 pl-4 pr-1.5 backdrop-blur-md" aria-label="Main">
@@ -135,8 +141,8 @@ export default function LandingImmersive({ onFail }) {
                 <p className="mb-3 text-xs font-semibold uppercase tracking-[0.35em] text-accent">{hero ? 'Email threat detection and forensics' : c.tag}</p>
                 {hero ? (
                   <>
-                    <h1 className="text-[clamp(2.4rem,8.5vw,6rem)] font-bold uppercase leading-none tracking-[0.16em] text-white">MailRakshak</h1>
-                    <p className="mt-5 max-w-xl text-lg text-slate-200 md:text-xl">Catch fraudulent email. Trace where it came from. Keep the proof.</p>
+                    <h1 className="text-[clamp(2.4rem,7.5vw,5.4rem)] font-bold uppercase leading-none tracking-[0.14em] text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.75)]">MailRakshak</h1>
+                    <p className="mt-5 max-w-xl text-lg text-slate-100 drop-shadow-[0_1px_10px_rgba(0,0,0,0.8)] md:text-xl">Catch fraudulent email. Trace where it came from. Keep the proof.</p>
                     <div className="mt-7 flex flex-wrap gap-3">
                       <Link to={home} className="rounded-full bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-ink-950 hover:brightness-110">{user ? 'Open your console' : 'Report an email'}</Link>
                       <button onClick={() => goTo(1)} className="rounded-full border border-white/25 px-6 py-3 text-sm font-semibold uppercase tracking-wider text-slate-100 hover:border-accent hover:text-accent">How it works</button>

@@ -90,6 +90,35 @@ function buildShield(color) {
   };
 }
 
+
+// Hero: the shield with a ring of small envelopes orbiting it
+function buildHero(color) {
+  const base = buildShield(color);
+  const w = 0.5, h = 0.34;
+  const pts = [-w / 2, -h / 2, 0, w / 2, -h / 2, 0, w / 2, -h / 2, 0, w / 2, h / 2, 0, w / 2, h / 2, 0, -w / 2, h / 2, 0, -w / 2, h / 2, 0, -w / 2, -h / 2, 0, -w / 2, h / 2, 0, 0, 0.02, 0, 0, 0.02, 0, w / 2, h / 2, 0];
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+  const orbit = new THREE.Group();
+  const mails = Array.from({ length: 7 }, (_, i) => {
+    const e = new THREE.LineSegments(geo, fixedLine('#ffffff', 1.1));
+    orbit.add(e);
+    return { e, a: (i / 7) * Math.PI * 2 };
+  });
+  orbit.rotation.x = 1.0;
+  base.group.add(orbit);
+  return {
+    group: base.group,
+    update(dt, t) {
+      base.update(dt, t);
+      orbit.rotation.z += dt * 0.35;
+      mails.forEach((m, i) => {
+        m.e.position.set(Math.cos(m.a) * 3.5, Math.sin(m.a) * 3.5, 0);
+        m.e.rotation.set(t * 0.6 + i, t * 0.4, 0);
+      });
+    },
+  };
+}
+
 function buildEnvelopes(color) {
   const group = new THREE.Group();
   const w = 1.2, h = 0.8;
@@ -288,10 +317,10 @@ export function createWalkthrough({ canvas, onFrame }) {
   for (let z = zStart; z >= zEnd; z -= 4) grid.push(-14, 0, z, 14, 0, z);
   const gg = new THREE.BufferGeometry();
   gg.setAttribute('position', new THREE.Float32BufferAttribute(grid, 3));
-  scene.add(new THREE.LineSegments(gg, lm(0.5, 0.35)));
+  scene.add(new THREE.LineSegments(gg, lm(0.4, 0.22)));
 
   // light strips along the floor edges and the ceiling
-  const stripMat = bm(1.6);
+  const stripMat = bm(0.85);
   [[-5, 0.04, 0.1, 0.08], [5, 0.04, 0.1, 0.08], [-2.5, 9, 0.1, 0.1], [2.5, 9, 0.1, 0.1]].forEach(([x, y, w, h]) => {
     const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, span), stripMat);
     m.position.set(x, y, (zStart + zEnd) / 2);
@@ -301,7 +330,7 @@ export function createWalkthrough({ canvas, onFrame }) {
   // pillars with a glowing edge
   const pCount = Math.ceil(span / 10) + 1;
   const bodies = new THREE.InstancedMesh(new THREE.BoxGeometry(0.6, 13, 0.6), new THREE.MeshBasicMaterial({ color: 0x04070c }), pCount * 2);
-  const glows = new THREE.InstancedMesh(new THREE.BoxGeometry(0.1, 11, 0.1), bm(1.6), pCount * 2);
+  const glows = new THREE.InstancedMesh(new THREE.BoxGeometry(0.08, 11, 0.08), bm(0.7), pCount * 2);
   let n = 0;
   for (let i = 0; i < pCount; i += 1) {
     for (const s of [-1, 1]) {
@@ -318,7 +347,7 @@ export function createWalkthrough({ canvas, onFrame }) {
 
   // arches over the path
   const aCount = Math.ceil(span / 20) + 1;
-  const arches = new THREE.InstancedMesh(new THREE.TorusGeometry(9, 0.1, 8, 64, Math.PI), bm(1.3), aCount);
+  const arches = new THREE.InstancedMesh(new THREE.TorusGeometry(9, 0.05, 8, 64, Math.PI), bm(0.6), aCount);
   for (let i = 0; i < aCount; i += 1) {
     dummy.position.set(0, 0, zStart - i * 20);
     dummy.updateMatrix();
@@ -338,12 +367,79 @@ export function createWalkthrough({ canvas, onFrame }) {
   }
   const pgeo = new THREE.BufferGeometry();
   pgeo.setAttribute('position', new THREE.BufferAttribute(ppos, 3));
-  scene.add(new THREE.Points(pgeo, reg(new THREE.PointsMaterial({ size: 0.09, transparent: true, opacity: 0.8, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }), 1.4)));
+  scene.add(new THREE.Points(pgeo, reg(new THREE.PointsMaterial({ size: 0.07, transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }), 0.9)));
+
+
+  // ---- atmosphere ----
+  const colB = new THREE.Color();
+  const sky = new THREE.Mesh(
+    new THREE.SphereGeometry(300, 24, 16),
+    new THREE.ShaderMaterial({
+      side: THREE.BackSide, depthWrite: false, fog: false,
+      uniforms: { uTop: { value: new THREE.Color() }, uHor: { value: new THREE.Color() } },
+      vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+      fragmentShader: 'uniform vec3 uTop; uniform vec3 uHor; varying vec3 vP; void main(){ float h = clamp(vP.y * 0.5 + 0.5, 0.0, 1.0); gl_FragColor = vec4(mix(uHor, uTop, pow(h, 1.3)), 1.0); }',
+    }),
+  );
+  sky.renderOrder = -10;
+  scene.add(sky);
+
+  const SN = small ? 400 : 900;
+  const spos = new Float32Array(SN * 3);
+  for (let i = 0; i < SN; i += 1) {
+    const r = 150 + Math.random() * 100, th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
+    spos[i * 3] = r * Math.sin(ph) * Math.cos(th);
+    spos[i * 3 + 1] = Math.abs(r * Math.cos(ph)) * 0.9 + 4;
+    spos[i * 3 + 2] = r * Math.sin(ph) * Math.sin(th);
+  }
+  const sgeo = new THREE.BufferGeometry();
+  sgeo.setAttribute('position', new THREE.BufferAttribute(spos, 3));
+  const stars = new THREE.Points(sgeo, new THREE.PointsMaterial({ color: 0xbfd8ff, size: 1.6, sizeAttenuation: false, transparent: true, opacity: 0.7, depthWrite: false, fog: false }));
+  scene.add(stars);
+
+  const auroraMat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, fog: false,
+    uniforms: { uTime: { value: 0 }, uA: { value: new THREE.Color() }, uB: { value: new THREE.Color() } },
+    vertexShader: 'uniform float uTime; varying vec2 vUv; void main(){ vUv = uv; vec3 p = position; p.z += sin(uv.y * 40.0 + uTime * 0.7) * 0.9 + sin(p.x * 0.5 + uTime * 0.5) * 0.6; gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0); }',
+    fragmentShader: 'uniform vec3 uA; uniform vec3 uB; uniform float uTime; varying vec2 vUv; void main(){ float band = sin(vUv.y * 70.0 + uTime * 0.8) * 0.5 + 0.5; float edge = smoothstep(0.0, 0.35, vUv.x) * smoothstep(1.0, 0.65, vUv.x); vec3 c = mix(uA, uB, band * 0.7 + vUv.x * 0.3); gl_FragColor = vec4(c, edge * (0.07 + 0.09 * band)); }',
+  });
+  const aurora = new THREE.Mesh(new THREE.PlaneGeometry(34, span, 24, 120), auroraMat);
+  aurora.rotation.x = -Math.PI / 2;
+  aurora.position.set(0, 13, (zStart + zEnd) / 2);
+  scene.add(aurora);
+
+  const runway = new THREE.Mesh(new THREE.PlaneGeometry(9, span), bm(0.5, { transparent: true, opacity: 0.07, blending: THREE.AdditiveBlending, depthWrite: false }));
+  runway.rotation.x = -Math.PI / 2;
+  runway.position.set(0, 0.02, (zStart + zEnd) / 2);
+  scene.add(runway);
+
+  const orbTex = (() => {
+    const c = document.createElement('canvas');
+    c.width = c.height = 128;
+    const g = c.getContext('2d');
+    const grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    grad.addColorStop(0, 'rgba(255,255,255,0.9)');
+    grad.addColorStop(0.35, 'rgba(255,255,255,0.25)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 128, 128);
+    return new THREE.CanvasTexture(c);
+  })();
+  const orbMatA = reg(new THREE.SpriteMaterial({ map: orbTex, transparent: true, opacity: 0.5, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }), 0.8);
+  const orbMatB = new THREE.SpriteMaterial({ map: orbTex, transparent: true, opacity: 0.4, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false });
+  const orbs = Array.from({ length: small ? 22 : 46 }, (_, i) => {
+    const sp = new THREE.Sprite(i % 3 === 0 ? orbMatB : orbMatA);
+    const sc = 0.9 + Math.random() * 2.6;
+    sp.scale.set(sc, sc, 1);
+    sp.position.set((Math.random() - 0.5) * 22, 0.6 + Math.random() * 7.5, zStart - Math.random() * span);
+    scene.add(sp);
+    return { sp, y0: sp.position.y, ph: Math.random() * 6.28, sp2: 0.2 + Math.random() * 0.4 };
+  });
 
   // chapter props
-  const builders = [buildShield, buildEnvelopes, buildNeural, buildGates, buildGlobe, buildCluster, buildChain, buildShield];
+  const builders = [buildHero, buildEnvelopes, buildNeural, buildGates, buildGlobe, buildCluster, buildChain, buildShield];
   const anchors = [
-    { land: [3.9, 2.0, -6.5], port: [0, 3.5, -8.5] },
+    { land: [5.6, 2.0, -6.5], port: [0, 3.5, -8.5] },
     { land: [4.2, 1.9, -6.5], port: [0, 3.6, -8.5] },
     { land: [4.2, 1.9, -6.5], port: [0, 3.6, -8.5] },
     { land: [0, 1.7, -3], port: [0, 1.7, -3] },
@@ -368,9 +464,11 @@ export function createWalkthrough({ canvas, onFrame }) {
   // post-processing (glow); skipped on small screens
   let composer = null;
   if (!small) {
+    renderer.toneMapping = THREE.ACESFilmicToneMapping; // rolls bright highlights off gently
+    renderer.toneMappingExposure = 0.95;
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
-    composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.85, 0.55, 0.12));
+    composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.5, 0.45, 0.85));
     composer.addPass(new OutputPass());
   }
 
@@ -387,7 +485,6 @@ export function createWalkthrough({ canvas, onFrame }) {
   // animation loop
   let target = 0, smooth = 0, time = 0, last = performance.now(), raf = 0;
   const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
-  const colorB = new THREE.Color();
   const frame = (now) => {
     raf = requestAnimationFrame(frame);
     const dt = Math.min(0.05, (now - last) / 1000);
@@ -404,8 +501,19 @@ export function createWalkthrough({ canvas, onFrame }) {
     camera.lookAt(mouse.x * 1.2, 1.7 + mouse.y * 0.5, camZ - 12);
 
     const i = Math.min(Math.floor(u), N - 2);
-    tint.set(COLORS[i]).lerp(colorB.set(COLORS[i + 1]), smoother(u - i));
+    tint.set(COLORS[i]).lerp(colB.set(COLORS[i + 1]), smoother(u - i));
     tinted.forEach(([m, k]) => m.color.copy(tint).multiplyScalar(k));
+    // a second, shifted hue gives the sky and lights some depth
+    colB.copy(tint).offsetHSL(0.16, 0, 0);
+    orbMatB.color.copy(colB);
+    auroraMat.uniforms.uA.value.copy(tint);
+    auroraMat.uniforms.uB.value.copy(colB);
+    auroraMat.uniforms.uTime.value = time;
+    sky.material.uniforms.uHor.value.copy(tint).multiplyScalar(0.07);
+    sky.material.uniforms.uTop.value.copy(colB).multiplyScalar(0.035);
+    sky.position.copy(camera.position);
+    stars.position.copy(camera.position);
+    orbs.forEach((o) => { o.sp.position.y = o.y0 + Math.sin(time * o.sp2 + o.ph) * 0.35; });
 
     props.forEach((p) => p.update(dt, time));
     for (let k = 0; k < PN; k += 1) {
